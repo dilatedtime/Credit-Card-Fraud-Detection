@@ -1,110 +1,34 @@
-# Credit Card Fraud Fraud Detection
+# Credit Card Fraud Detection
 
-## Overview
+This notebook compares four ways to find fraud in a highly imbalanced credit card transaction dataset: Isolation Forest, Local Outlier Factor, XGBoost with SMOTE, and a neural-network autoencoder.
 
-This repository implements a comprehensive anomaly detection pipeline to identify fraudulent credit card transactions in a highly imbalanced dataset. The workflow encompasses exploratory data analysis, unsupervised outlier detection, supervised classification with XGBoost, and deep learning-based autoencoders, combined with evaluation metrics and visualizations.
+The work starts with class balance, transaction amounts, correlations, and a 10% working sample. It then compares unsupervised anomaly detection with supervised and reconstruction-based methods.
 
-## Key Features
+## Saved results
 
-* Exploratory Data Analysis and Visualization
-* Class Imbalance Assessment and Handling
-* Unsupervised Outlier Detection: Isolation Forest, Local Outlier Factor
-* Supervised Classification: XGBoost with SMOTE Oversampling
-* Deep Learning Autoencoder for Anomaly Detection
-* Hyperparameter Optimization using GridSearchCV
-* Evaluation Reports: Accuracy, Precision, Recall, F1-Score
-* Confusion Matrix Visualizations
+The notebook contains output for a dataset with 284,807 transactions and 492 fraud cases.
 
-## Data Description
+| Model | Accuracy | Fraud precision | Fraud recall | Fraud F1 |
+| --- | ---: | ---: | ---: | ---: |
+| Isolation Forest | 99.74% | 0.26 | 0.27 | 0.26 |
+| Local Outlier Factor | 99.66% | 0.02 | 0.02 | 0.02 |
+| XGBoost | 99.92% | 0.79 | 0.71 | 0.75 |
+| Autoencoder | 94.84% | 0.00 | 0.03 | 0.00 |
 
-* **Source File**: `creditcard.csv`
-* **Dimensions**: 284,807 transactions × 31 features
-* **Target Variable**: `Class` (0 = Normal, 1 = Fraud)
-* **Features**: 28 anonymized principal components (`V1`–`V28`), `Time`, `Amount`
+Accuracy can look impressive when fraud represents about 0.17% of the data. Precision, recall, and F1 for the fraud class give a more useful comparison. In the saved run, XGBoost found the best balance.
 
-## Data Preprocessing
+## Run the notebook
 
-1. **Missing Values**
+The dataset is not committed because of its size. Place a file named `creditcard.csv` in the repository root before you start.
 
-   * Verified absence of null values in all columns.
+```bash
+git clone https://github.com/dilatedtime/Credit-Card-Fraud-Detection.git
+cd Credit-Card-Fraud-Detection
+python -m venv .venv
+python -m pip install jupyter pandas numpy matplotlib seaborn scikit-learn imbalanced-learn xgboost tensorflow
+jupyter notebook CreditCardFraudDetection.ipynb
+```
 
-2. **Class Distribution Analysis**
+Run the cells in order. TensorFlow training can take several minutes, depending on your hardware.
 
-   * Visualized the severe imbalance: 0.17% fraud vs. 99.83% normal transactions.
-
-3. **Feature Exploration**
-
-   * Histograms and log-scaled plots of `Amount` for fraud and normal classes.
-   * Scatter plots of `Time` versus `Amount`.
-   * Correlation heatmap to identify features most correlated with fraud.
-
-4. **Data Sampling**
-
-   * Randomly sampled 10% of the data for model development to reduce computational load.
-
-## Modeling Approaches and Hyperparameters
-
-### Unsupervised Outlier Detection
-
-| Model                | Key Parameters                         | Methodology                                         |
-| -------------------- | -------------------------------------- | --------------------------------------------------- |
-| Isolation Forest     | `n_estimators=100`, `max_samples=100%` | Detects anomalies by random tree isolation.         |
-| Local Outlier Factor | `n_neighbors=20`                       | Scores instances based on local density deviations. |
-
-### Supervised Classification
-
-| Model   | Hyperparameters                                                                                     | Notes                                                |
-| ------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| XGBoost | `n_estimators=100`, `max_depth=5`, `learning_rate=0.1` <br> `subsample=0.8`, `colsample_bytree=0.8` | Trained on SMOTE-oversampled data for class balance. |
-
-### Deep Learning Autoencoder
-
-| Component   | Configuration                                             | Description                                                       |
-| ----------- | --------------------------------------------------------- | ----------------------------------------------------------------- |
-| Autoencoder | `encoding_dim=14`, `layers=[input → 14 → 7 → 14 → input]` | Trained on normal transactions; threshold at 95th percentile MSE. |
-
-## Evaluation Metrics
-
-For each method, performance was evaluated using:
-
-* **Accuracy**
-* **Precision** (Fraud class)
-* **Recall** (Fraud class)
-* **F1-Score** (Fraud class)
-* **Confusion Matrix**
-
-| Model                | Accuracy | Precision (Fraud) | Recall (Fraud) | F1-Score (Fraud) |
-| -------------------- | -------: | ----------------: | -------------: | ---------------: |
-| Isolation Forest     |   99.74% |              0.23 |           0.27 |             0.25 |
-| Local Outlier Factor |   99.66% |              0.15 |           0.02 |             0.04 |
-| XGBoost Classifier   |   99.92% |              0.85 |           0.71 |             0.77 |
-| Autoencoder          |   94.84% |              0.06 |           0.03 |             0.04 |
-
-## Execution
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/your-org/credit-card-anomaly.git
-   cd credit-card-anomaly
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Run the analysis notebook**
-
-   ```bash
-   jupyter notebook anomaly_detection.ipynb
-   ```
-
-## Results and Conclusion
-
-* **XGBoost** achieved the highest performance with **99.92% accuracy** and **0.77 F1-score** for fraud detection.
-* **Isolation Forest** and **LOF** demonstrate unsupervised detection capability but lower fraud recall.
-* **Autoencoder** offers insights via reconstruction error but requires further tuning for class imbalance.
-
-The pipeline showcases effective strategies for anomaly detection in imbalanced datasets, combining unsupervised, supervised, and deep learning approaches.
+This is an educational comparison, not a fraud decision system. A real deployment would need time-aware validation, threshold tuning around investigation costs, monitoring for drift, and a clear review process for flagged transactions.
